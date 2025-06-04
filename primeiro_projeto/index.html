@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Bomba</title>
+    <style> 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #1e1e1e, #121212);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        h1 {
+            background-color: #333;
+            padding: 20px;
+            margin: 0;
+            font-size: 2.5em;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .container {
+            margin-top: 50px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            width: 100px;
+            height: 100px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .controls {
+            margin-top: 30px;
+        }
+
+        button.control {
+            padding: 12px 24px;
+            margin: 10px;
+            font-size: 16px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button.control:hover {
+            background-color: #777;
+        }
+
+        .result {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>💣 Jogo da Bomba 💣</h1>
+
+    <div class="container">
+        <button id="botao1" class="btn" onclick="MudarCor(0)"></button>
+        <button id="botao2" class="btn" onclick="MudarCor(1)"></button>
+        <button id="botao3" class="btn" onclick="MudarCor(2)"></button>
+        <button id="botao4" class="btn" onclick="MudarCor(3)"></button>
+        <button id="botao5" class="btn" onclick="MudarCor(4)"></button>
+    </div>
+
+    <div class="controls">
+        <button class="control" onclick="MudarResposta()">🔁 Trocar Cores</button>
+        <button class="control" onclick="AnalizarCor()">✅ Analisar</button>
+    </div>
+
+    <div class="result" id="resultado"></div>
+
+    <script>
+        // Definimos duas sequências de cores que serão os "gabaritos" possíveis
+        const cores1 = ["blue", "green", "purple", "orange", "yellow"];
+        const cores2 = ["yellow", "purple", "blue", "green", "orange"];
+
+        // Começamos usando a primeira sequência como gabarito ativo
+        let seletorCores = cores1;
+
+        // Variável para alternar entre os dois gabaritos
+        let comutacao = 0;
+
+        // Selecionamos todos os botões que têm a classe 'btn' (os botões coloridos do jogo)
+        const botoes = document.querySelectorAll('.btn');
+
+        // Criamos um array para guardar qual cor está selecionada em cada botão individualmente
+        // Inicialmente todos começam com índice 0, que corresponde a cor inicial do ciclo
+        let contadores = [0, 0, 0, 0, 0];
+
+        // Função para trocar o gabarito atual
+        function MudarResposta() {
+            // Se o comutacao for 0, troca para cores2, senão volta para cores1
+            // Isso permite alternar entre dois conjuntos de respostas corretas
+            seletorCores = comutacao === 0 ? cores2 : cores1;
+
+            // Alterna o valor de comutacao entre 0 e 1 (inversão)
+            comutacao = 1 - comutacao;
+
+            // Atualiza o texto na tela para avisar o jogador que o gabarito mudou
+            document.getElementById("resultado").textContent = "Gabarito alterado!";
+        }
+
+        // Função para mudar a cor do botão clicado
+        // 'index' é o número do botão, de 0 a 4
+        function MudarCor(index) {
+            // Incrementamos o contador daquele botão em 1, para passar para a próxima cor
+            // Usamos o operador módulo (%) para voltar ao começo depois da última cor (6 cores)
+            contadores[index] = (contadores[index] + 1) % 6;
+
+            // Lista de todas as cores possíveis que o botão pode assumir
+            const coresPossiveis = ["blue", "green", "purple", "orange", "yellow", "red"];
+
+            // Definimos a cor atual do botão com base no contador daquele botão
+            const corAtual = coresPossiveis[contadores[index]];
+
+            // Aplicamos a cor ao estilo de fundo do botão na tela
+            botoes[index].style.backgroundColor = corAtual;
+        }
+
+        // Função que verifica quantos botões estão com a cor correta
+        function AnalizarCor() {
+            // Contador para quantos botões estão certos
+            let acertos = 0;
+
+            // Para cada botão e seu índice na lista
+            botoes.forEach((botao, i) => {
+                // Pegamos a cor atual do botão
+                const corAtual = botao.style.backgroundColor;
+
+                // Comparamos com a cor correta do gabarito na mesma posição (índice)
+                if (corAtual === seletorCores[i]) {
+                    // Se acertou, adiciona uma borda verde para indicar sucesso
+                    botao.style.border = "3px solid limegreen";
+                    // Soma 1 ao contador de acertos
+                    acertos++;
+                } else {
+                    // Se errou, coloca borda vermelha e pinta o botão de branco para destacar o erro
+                    botao.style.border = "3px solid red";
+                    botao.style.backgroundColor = "white";
+                }
+            });
+
+            // Exibe uma mensagem na tela mostrando quantas cores o jogador acertou
+            // O texto muda entre singular e plural de acordo com o número de acertos
+            document.getElementById("resultado").textContent = `Você acertou ${acertos} ${acertos === 1 ? "cor" : "cores"}!`;
+        }
+
+    </script>
+</body>
+
+</html>
